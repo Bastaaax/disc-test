@@ -19,8 +19,9 @@ npm install
 
 ## Configuration Supabase
 
-1. Créez un projet sur [supabase.com](https://supabase.com).
-2. Dans le SQL Editor, exécutez le contenu du fichier `supabase/migrations/001_disc_results.sql` pour créer la table `disc_results` et les politiques RLS.
+Le projet Supabase **DISC** est déjà créé. Pour le brancher à l’app :
+
+1. Dans le dashboard de ton projet (DISC), ouvre le **SQL Editor** et exécutez le contenu de `supabase/migrations/001_disc_results.sql` pour créer la table `disc_results` et les politiques RLS.
 3. Copiez l’URL du projet et la clé anonyme (anon key) depuis **Settings → API**.
 4. Créez un fichier `.env` à la racine (voir `.env.example`) :
 
@@ -60,3 +61,8 @@ Les résultats sont enregistrés dans Supabase après la dernière question. En 
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
 3. Déploie : chaque push sur `main` déclenche un déploiement automatique.
+
+**Si les résultats n’apparaissent pas en base :**
+- En local : vérifie que `.env` contient bien `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (sans espace, sans guillemets en trop).
+- Sur Vercel : va dans **Settings → Environment Variables**, ajoute les deux variables pour **Production** (et Preview si tu veux), puis **redéploie** (Redeploy) pour que les nouvelles variables soient prises en compte.
+- Sur la page résultats, un message d’erreur s’affiche si la sauvegarde échoue. Ouvre aussi la console du navigateur (F12) pour voir le détail.

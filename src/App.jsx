@@ -24,7 +24,13 @@ export default function App() {
           />
         )}
         {disc.currentStep === 'results' && (
-          <Results results={disc.results} isSaving={disc.isSaving} onReset={disc.resetQuiz} />
+          <Results
+            results={disc.results}
+            isSaving={disc.isSaving}
+            saveError={disc.saveError}
+            saveSuccess={disc.saveSuccess}
+            onReset={disc.resetQuiz}
+          />
         )}
       </div>
     </ThemeProvider>

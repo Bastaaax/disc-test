@@ -20,7 +20,7 @@ import ProfileModal from './ProfileModal'
 
 const profileOrder = ['D', 'I', 'S', 'C']
 
-export default function Results({ results, isSaving, onReset }) {
+export default function Results({ results, isSaving, saveError, saveSuccess, onReset }) {
   const [modalProfile, setModalProfile] = useState(null)
   const exportCardRef = useRef(null)
 
@@ -171,6 +171,14 @@ export default function Results({ results, isSaving, onReset }) {
         </p>
         {isSaving && (
           <p className="text-amber-600 dark:text-amber-400 text-sm mt-2">Sauvegarde en cours...</p>
+        )}
+        {saveSuccess && !isSaving && (
+          <p className="text-green-600 dark:text-green-400 text-sm mt-2">Résultats enregistrés dans la base.</p>
+        )}
+        {saveError && !isSaving && (
+          <p className="text-red-600 dark:text-red-400 text-sm mt-2 max-w-xl mx-auto">
+            {saveError}
+          </p>
         )}
       </motion.div>
 

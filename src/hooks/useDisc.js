@@ -9,6 +9,8 @@ export function useDisc() {
   const [userInfo, setUserInfo] = useState({ firstName: '', lastName: '', email: '' })
   const [results, setResults] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Au chargement : si l’URL contient des résultats partagés, afficher directement la page résultats
   useEffect(() => {
@@ -100,7 +102,8 @@ export function useDisc() {
 
     setResults(resultsData)
 
-    // Sauvegarde Supabase (si configuré)
+    setSaveError(null)
+    setSaveSuccess(false)
     setIsSaving(true)
     if (supabase) {
       try {
@@ -120,10 +123,18 @@ export function useDisc() {
           percentage_s: parseFloat(percentages.S),
           percentage_c: parseFloat(percentages.C),
         })
-        if (error) console.error('Supabase error:', error)
+        if (error) {
+          console.error('Supabase error:', error)
+          setSaveError(error.message || 'Erreur lors de la sauvegarde')
+        } else {
+          setSaveSuccess(true)
+        }
       } catch (err) {
         console.error('Failed to save results:', err)
+        setSaveError(err.message || 'Erreur réseau ou serveur')
       }
+    } else {
+      setSaveError('Supabase non configuré (variables d’environnement manquantes)')
     }
     setIsSaving(false)
 
@@ -139,7 +150,7 @@ export function useDisc() {
   }, [])
 
   return {
-    currentStep, currentQuestion, answers, userInfo, results, isSaving,
+    currentStep, currentQuestion, answers, userInfo, results, isSaving, saveError, saveSuccess,
     startQuiz, answerQuestion, nextQuestion, prevQuestion, calculateResults, resetQuiz
   }
 }
