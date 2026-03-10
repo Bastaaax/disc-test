@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import html2canvas from 'html2canvas'
 import {
   RadarChart,
   Radar,
@@ -21,6 +22,7 @@ const profileOrder = ['D', 'I', 'S', 'C']
 
 export default function Results({ results, isSaving, onReset }) {
   const [modalProfile, setModalProfile] = useState(null)
+  const exportCardRef = useRef(null)
 
   if (!results) return null
 
@@ -62,11 +64,99 @@ export default function Results({ results, isSaving, onReset }) {
     navigator.clipboard.writeText(url).then(() => alert('Lien copié dans le presse-papier !'))
   }
 
+  const handleExportImage = async () => {
+    if (!exportCardRef.current) return
+    try {
+      const canvas = await html2canvas(exportCardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#f8fafc',
+        logging: false
+      })
+      const link = document.createElement('a')
+      link.download = `resultats-disc-${userInfo.firstName || 'profil'}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (err) {
+      console.error('Export image failed:', err)
+      alert('L\'export de l\'image a échoué.')
+    }
+  }
+
   const chartTextColor = '#475569'
   const chartGridColor = 'rgba(148, 163, 184, 0.35)'
 
   return (
     <div className="min-h-screen py-8 px-4 pt-16 max-w-4xl mx-auto">
+      {/* Carte simplifiée pour export image (rendue hors écran) */}
+      <div
+        ref={exportCardRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: 400,
+          padding: 24,
+          backgroundColor: '#f8fafc',
+          fontFamily: 'system-ui, sans-serif',
+          color: '#0f172a',
+          borderRadius: 16,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+        }}
+      >
+        <p style={{ margin: 0, fontSize: 12, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          Mes résultats
+        </p>
+        <h2 style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 700, backgroundImage: `linear-gradient(90deg, ${profiles.D.color}, ${profiles.I.color}, ${profiles.S.color}, ${profiles.C.color})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          Test DISC
+        </h2>
+        {userInfo.firstName && (
+          <p style={{ margin: '8px 0 0', fontSize: 16, color: '#475569' }}>
+            {userInfo.firstName}
+          </p>
+        )}
+        <div
+          style={{
+            marginTop: 20,
+            padding: 20,
+            borderRadius: 12,
+            backgroundColor: `${dominant.color}18`,
+            border: `2px solid ${dominant.color}40`,
+            textAlign: 'center'
+          }}
+        >
+          <span style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>{dominant.emoji}</span>
+          <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#0f172a' }}>{dominant.name}</p>
+          <p style={{ margin: '4px 0 0', fontSize: 14, color: '#475569' }}>{dominant.tagline}</p>
+          <p style={{ margin: '12px 0 0', fontSize: 18, fontWeight: 600, color: dominant.color }}>
+            {scores[dominantProfile]} / 25 ({percentages[dominantProfile]} %)
+          </p>
+        </div>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {profileOrder.map((key) => (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ width: 20, fontWeight: 700, color: profiles[key].color }}>{profiles[key].shortName}</span>
+              <div style={{ flex: 1, height: 12, backgroundColor: '#e2e8f0', borderRadius: 6, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: `${(scores[key] / 25) * 100}%`,
+                    height: '100%',
+                    backgroundColor: profiles[key].color,
+                    borderRadius: 6
+                  }}
+                />
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#334155', minWidth: 48 }}>
+                {scores[key]} ({percentages[key]} %)
+              </span>
+            </div>
+          ))}
+        </div>
+        <p style={{ marginTop: 24, marginBottom: 0, fontSize: 11, color: '#94a3b8' }}>
+          Test DISC — Profil comportemental
+        </p>
+      </div>
       {/* Header résultats */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -77,7 +167,7 @@ export default function Results({ results, isSaving, onReset }) {
           Tes résultats DISC
         </h1>
         <p className="text-slate-600 dark:text-slate-300 text-lg">
-          {userInfo.firstName}, voici ton profil.
+          {userInfo.firstName ? `${userInfo.firstName}, voici ton profil.` : 'Résultats partagés — voici le profil.'}
         </p>
         {isSaving && (
           <p className="text-amber-600 dark:text-amber-400 text-sm mt-2">Sauvegarde en cours...</p>
@@ -305,10 +395,17 @@ export default function Results({ results, isSaving, onReset }) {
         </button>
         <button
           type="button"
+          onClick={handleExportImage}
+          className="px-6 py-3 rounded-xl font-semibold border border-slate-300 dark:border-white/20 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition"
+        >
+          Exporter en image
+        </button>
+        <button
+          type="button"
           onClick={handleShare}
           className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-amber-500/90 to-blue-500/90 text-white hover:opacity-90 transition"
         >
-          Partager mes résultats
+          Partager le lien
         </button>
       </motion.div>
 

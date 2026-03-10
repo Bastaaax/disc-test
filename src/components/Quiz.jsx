@@ -36,6 +36,11 @@ export default function Quiz({
         </div>
       </div>
 
+      {question.context && (
+        <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg mb-3">
+          {question.context}
+        </p>
+      )}
       <h2 className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-6">
         Quelle affirmation te correspond le mieux ?
       </h2>

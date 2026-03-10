@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { scoringKey } from '../data/scoringKey'
 import { supabase } from '../lib/supabase'
 
@@ -9,6 +9,40 @@ export function useDisc() {
   const [userInfo, setUserInfo] = useState({ firstName: '', lastName: '', email: '' })
   const [results, setResults] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Au chargement : si l’URL contient des résultats partagés, afficher directement la page résultats
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const d = params.get('d')
+    const i = params.get('i')
+    const s = params.get('s')
+    const c = params.get('c')
+    const dominant = params.get('dominant')
+    const secondary = params.get('secondary')
+    if (d == null || i == null || s == null || c == null || !dominant || !secondary) return
+    const scoreD = parseInt(d, 10)
+    const scoreI = parseInt(i, 10)
+    const scoreS = parseInt(s, 10)
+    const scoreC = parseInt(c, 10)
+    if ([scoreD, scoreI, scoreS, scoreC].some((n) => isNaN(n))) return
+    const total = scoreD + scoreI + scoreS + scoreC
+    if (total === 0) return
+    if (!['D', 'I', 'S', 'C'].includes(dominant) || !['D', 'I', 'S', 'C'].includes(secondary)) return
+    const percentages = {
+      D: ((scoreD / total) * 100).toFixed(1),
+      I: ((scoreI / total) * 100).toFixed(1),
+      S: ((scoreS / total) * 100).toFixed(1),
+      C: ((scoreC / total) * 100).toFixed(1),
+    }
+    setResults({
+      scores: { D: scoreD, I: scoreI, S: scoreS, C: scoreC },
+      percentages,
+      dominantProfile: dominant,
+      secondaryProfile: secondary,
+      userInfo: { firstName: '', lastName: '', email: '' },
+    })
+    setCurrentStep('results')
+  }, [])
 
   const startQuiz = useCallback((info) => {
     setUserInfo(info)
