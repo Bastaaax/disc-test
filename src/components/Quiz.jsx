@@ -37,7 +37,7 @@ export default function Quiz({
       </div>
 
       <h2 className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-6">
-        {question.question}
+        Quelle affirmation te correspond le mieux ?
       </h2>
 
       <AnimatePresence mode="wait">
